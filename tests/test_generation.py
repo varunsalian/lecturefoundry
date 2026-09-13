@@ -124,6 +124,9 @@ def test_generation_uses_numbered_module_and_lecture_directories(tmp_path: Path)
     assert "Module 01 · Lecture 04" in html
     assert "&lt;em&gt;isn&#x27;t&lt;/em&gt;" in html
     assert "Transcript:" in backend.requests[0].prompt
+    assert "not general knowledge or material from other lectures" in backend.requests[0].prompt
+    assert "never invent a hypothetical" in backend.requests[0].prompt
+    assert "does not mean \"global\"" in backend.requests[0].prompt
 
 
 def test_generation_protects_existing_output(tmp_path: Path) -> None:

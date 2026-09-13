@@ -11,7 +11,7 @@ class PatternSpec:
     name: str
     description: str
     instructions: str
-    version: str = "1.1"
+    version: str = "1.2"
     min_sections: int = 1
     max_sections: int | None = None
     min_examples: int = 1
@@ -74,11 +74,11 @@ PATTERNS: dict[str, PatternSpec] = {
     "deep-dive": PatternSpec(
         key="deep-dive",
         name="Descriptive deep dive",
-        description="Narrative, source-grounded explanation with additional context.",
+        description="Detailed narrative explanation grounded entirely in the source.",
         instructions=(
             "Write 4-6 logically ordered sections in an approachable editorial style. "
-            "Explain connections that the transcript leaves implicit, without inventing "
-            "source claims."
+            "Explain the transcript in detail without adding outside context, terminology, "
+            "examples, consequences, or advice."
         ),
         min_sections=4,
         max_sections=6,
@@ -101,7 +101,8 @@ PATTERNS: dict[str, PatternSpec] = {
         name="Concept map",
         description="Visual argument or causal sequence supported by concrete examples.",
         instructions=(
-            "Create exactly 4 short sections that form a logical or causal chain. "
+            "Create exactly 4 short sections that form a logical sequence grounded in the "
+            "transcript. Use causal language only when the transcript makes a causal claim. "
             "Each heading must be a compact node label and each body must explain its connection."
         ),
         min_sections=4,
@@ -138,12 +139,25 @@ Do not use Markdown fences, commentary, or HTML.
 
 Rules:
 - Treat the transcript as the source of truth.
-- Do not claim that an added explanation or analogy appeared in the lecture.
-- Do not invent history, attribution, causation, research findings, or quotations.
+- Use only this lecture's transcript, not general knowledge or material from other lectures.
+- Every factual sentence must be directly supported by, or be a meaning-preserving paraphrase
+  of, a specific part of the transcript.
+- Do not introduce named concepts, technical labels, history, attribution, causation, research
+  findings, statistics, consequences, recommendations, quotations, or platform policies that
+  the transcript does not state.
+- Do not broaden the source's scope: for example, "a bigger group" does not mean "global",
+  and a warning about one platform does not establish rules for every unofficial platform.
+- Preserve uncertainty, correlation-versus-causation, approximate quantities, and ambiguous
+  wording instead of silently making them more definite.
+- Examples must come from examples or concrete facts in the transcript. If the transcript is
+  sparse, reuse or reorganize its facts to satisfy the schema; never invent a hypothetical.
+- An action prompt may ask the learner to apply a source idea, but it must not add a factual
+  claim or imply that its suggested action appeared in the lecture.
 - If a detail is not stated or clearly implied by the transcript, omit it.
 - Do not reproduce long transcript passages; summarize and paraphrase.
 - Use accessible language and preserve the lecturer's meaning.
 - Every review question must be answerable from the generated content.
+- Do not repeat the action prompt as a regular section.
 
 Course: {course_slug}
 Module {module_number:02d}: {module_title}
