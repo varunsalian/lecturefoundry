@@ -1,0 +1,24 @@
+.DS_Store
+.venv*/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# Authentication exports and generated course content stay local.
+*cookies*.txt
+.env
+.env.*
+!.env.example
+transcripts/
+site/
+codex-luna-test/
+prototypes/

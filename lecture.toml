@@ -1,0 +1,72 @@
+[ai]
+# Supported providers: ollama, codex, claude, openai, openai-compatible,
+# anthropic, gemini
+provider = "ollama"
+timeout_seconds = 600
+system_prompt = """
+You create accurate, accessible learning material from supplied course
+transcripts. Preserve the source meaning, distinguish source material from
+added explanation, and follow the requested output format exactly.
+"""
+
+[ai.ollama]
+# Set this to an instruction model already shown by `ollama list`.
+model = ""
+base_url = "http://localhost:11434"
+structured_output = true
+# For https://ollama.com, set this to the name of an environment variable.
+api_key_env = ""
+
+[ai.codex]
+command = "codex"
+# Omit model to use the user's configured Codex default.
+model = ""
+# Codex is an agent and may inspect readable files even in its read-only sandbox.
+# Enable only for transcript sources you trust.
+allow_agentic_file_reads = false
+
+[ai.claude]
+command = "claude"
+# Omit model to use the user's configured Claude default.
+model = ""
+max_turns = 1
+
+# Native OpenAI Responses API. Put the key in OPENAI_API_KEY, never this file.
+[ai.openai]
+model = ""
+base_url = "https://api.openai.com/v1"
+api_key_env = "OPENAI_API_KEY"
+structured_output = true
+send_temperature = false
+# Optional. If omitted, the model/provider chooses its output limit.
+# max_output_tokens = 16384
+organization_env = ""
+project_env = ""
+
+# Chat Completions services such as OpenRouter, Groq, or Together.
+# Change both the URL and environment-variable name for the chosen service.
+[ai.openai-compatible]
+model = ""
+base_url = "https://openrouter.ai/api/v1"
+api_key_env = "OPENROUTER_API_KEY"
+structured_output = true
+max_tokens = 4096
+
+# Native Anthropic Messages API.
+[ai.anthropic]
+model = ""
+base_url = "https://api.anthropic.com/v1"
+api_key_env = "ANTHROPIC_API_KEY"
+api_version = "2023-06-01"
+max_tokens = 4096
+structured_output = true
+send_temperature = false
+workspace_env = ""
+
+# Native Google Gemini generateContent API.
+[ai.gemini]
+model = ""
+base_url = "https://generativelanguage.googleapis.com/v1beta"
+api_key_env = "GEMINI_API_KEY"
+structured_output = true
+max_output_tokens = 4096
