@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from coursera_lectures.ai.base import AIBackendError, GenerationRequest
-from coursera_lectures.ai.claude import ClaudeCLIBackend
-from coursera_lectures.ai.codex import CodexCLIBackend
-from coursera_lectures.ai.http import retrying_session
-from coursera_lectures.ai.ollama import OllamaBackend
-from coursera_lectures.ai.schema import schema_for_provider
-from coursera_lectures.lesson import lesson_content_schema
+from lecturefoundry.ai.base import AIBackendError, GenerationRequest
+from lecturefoundry.ai.claude import ClaudeCLIBackend
+from lecturefoundry.ai.codex import CodexCLIBackend
+from lecturefoundry.ai.http import retrying_session
+from lecturefoundry.ai.ollama import OllamaBackend
+from lecturefoundry.ai.schema import schema_for_provider
+from lecturefoundry.lesson import lesson_content_schema
 
 
 class FakeResponse:
@@ -150,7 +150,7 @@ def test_codex_reads_final_message_file(monkeypatch) -> None:
     ]
     assert "System instructions:" in captured["prompt"]
     assert "COURSERA_CAUTH" not in captured["environment"]
-    assert Path(captured["cwd"]).name.startswith("coursera-lectures-codex-")
+    assert Path(captured["cwd"]).name.startswith("lecturefoundry-codex-")
     assert result.text == "<html>codex</html>"
 
 
@@ -199,7 +199,7 @@ def test_claude_uses_non_interactive_plan_mode(monkeypatch) -> None:
     sent_schema = captured["arguments"][captured["arguments"].index("--json-schema") + 1]
     assert "minLength" not in sent_schema
     assert "COURSERA_CAUTH" not in captured["environment"]
-    assert Path(captured["cwd"]).name.startswith("coursera-lectures-claude-")
+    assert Path(captured["cwd"]).name.startswith("lecturefoundry-claude-")
     assert result.text == "<html>claude</html>"
 
 

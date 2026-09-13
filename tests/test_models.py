@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from coursera_lectures.models import FetchRequest, FetchResult, TranscriptFormat
+from lecturefoundry.models import FetchRequest, FetchResult, TranscriptFormat
 
 
 def test_fetch_request_defaults() -> None:

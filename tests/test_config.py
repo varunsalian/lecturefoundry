@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from coursera_lectures.config import load_ai_settings
+from lecturefoundry.config import load_ai_settings
 
 
 def test_loads_selected_provider_table(tmp_path: Path) -> None:

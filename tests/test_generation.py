@@ -3,15 +3,15 @@ from pathlib import Path
 
 import pytest
 
-from coursera_lectures.ai import GenerationResult
-from coursera_lectures.build import BuildRequest, generate_lecture
-from coursera_lectures.catalog import (
+from lecturefoundry.ai import GenerationResult
+from lecturefoundry.build import BuildRequest, generate_lecture
+from lecturefoundry.catalog import (
     CourseCatalog,
     LectureRecord,
     ModuleRecord,
     save_catalog,
 )
-from coursera_lectures.lesson import parse_lesson_content
+from lecturefoundry.lesson import parse_lesson_content
 
 
 MODEL_JSON = json.dumps(

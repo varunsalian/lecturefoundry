@@ -1,6 +1,6 @@
 """Shared prompt construction for command-backed agents."""
 
-from coursera_lectures.ai.base import GenerationRequest
+from lecturefoundry.ai.base import GenerationRequest
 
 
 def combine_prompt(request: GenerationRequest) -> str:

@@ -1,14 +1,14 @@
 """Construct AI backends from project settings."""
 
-from coursera_lectures.ai.base import AIBackend
-from coursera_lectures.ai.anthropic import AnthropicBackend
-from coursera_lectures.ai.claude import ClaudeCLIBackend
-from coursera_lectures.ai.codex import CodexCLIBackend
-from coursera_lectures.ai.gemini import GeminiBackend
-from coursera_lectures.ai.ollama import OllamaBackend
-from coursera_lectures.ai.openai import OpenAIBackend
-from coursera_lectures.ai.openai_compatible import OpenAICompatibleBackend
-from coursera_lectures.config import AISettings
+from lecturefoundry.ai.base import AIBackend
+from lecturefoundry.ai.anthropic import AnthropicBackend
+from lecturefoundry.ai.claude import ClaudeCLIBackend
+from lecturefoundry.ai.codex import CodexCLIBackend
+from lecturefoundry.ai.gemini import GeminiBackend
+from lecturefoundry.ai.ollama import OllamaBackend
+from lecturefoundry.ai.openai import OpenAIBackend
+from lecturefoundry.ai.openai_compatible import OpenAICompatibleBackend
+from lecturefoundry.config import AISettings
 
 
 def _optional(value: object) -> str | None:

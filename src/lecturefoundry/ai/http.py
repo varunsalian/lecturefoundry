@@ -9,7 +9,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from coursera_lectures.ai.base import AIBackendError, BackendStatus
+from lecturefoundry.ai.base import AIBackendError, BackendStatus
 
 
 def retrying_session() -> requests.Session:

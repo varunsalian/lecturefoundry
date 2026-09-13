@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from coursera_lectures.models import FetchRequest, FetchResult
+from lecturefoundry.models import FetchRequest, FetchResult
 
 
 class TranscriptProvider(Protocol):

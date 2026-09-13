@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import requests
 
-from coursera_lectures.ai.base import (
+from lecturefoundry.ai.base import (
     AIBackendError,
     BackendStatus,
     GenerationRequest,
     GenerationResult,
 )
-from coursera_lectures.ai.http import APIKeyBackend, response_json
-from coursera_lectures.ai.schema import prompt_with_schema, schema_for_provider
+from lecturefoundry.ai.http import APIKeyBackend, response_json
+from lecturefoundry.ai.schema import prompt_with_schema, schema_for_provider
 
 
 class OpenAICompatibleBackend(APIKeyBackend):

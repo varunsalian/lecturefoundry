@@ -1,12 +1,12 @@
 # Contributing
 
-Thanks for helping improve Coursera Lectures.
+Thanks for helping improve LectureFoundry.
 
 ## Development setup
 
 ```bash
-git clone https://github.com/varunsalian/coursera-lectures.git
-cd coursera-lectures
+git clone https://github.com/varunsalian/lecturefoundry.git
+cd lecturefoundry
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'

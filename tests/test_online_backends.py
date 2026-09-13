@@ -2,12 +2,12 @@ import os
 
 import pytest
 
-from coursera_lectures.ai import AIBackendError, GenerationRequest
-from coursera_lectures.ai.anthropic import AnthropicBackend
-from coursera_lectures.ai.gemini import GeminiBackend
-from coursera_lectures.ai.openai import OpenAIBackend
-from coursera_lectures.ai.openai_compatible import OpenAICompatibleBackend
-from coursera_lectures.lesson import lesson_content_schema
+from lecturefoundry.ai import AIBackendError, GenerationRequest
+from lecturefoundry.ai.anthropic import AnthropicBackend
+from lecturefoundry.ai.gemini import GeminiBackend
+from lecturefoundry.ai.openai import OpenAIBackend
+from lecturefoundry.ai.openai_compatible import OpenAICompatibleBackend
+from lecturefoundry.lesson import lesson_content_schema
 
 
 class FakeResponse:

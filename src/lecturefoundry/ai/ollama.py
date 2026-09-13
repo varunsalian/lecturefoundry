@@ -8,14 +8,14 @@ from urllib.parse import urlparse
 
 import requests
 
-from coursera_lectures.ai.base import (
+from lecturefoundry.ai.base import (
     AIBackendError,
     BackendStatus,
     GenerationRequest,
     GenerationResult,
 )
-from coursera_lectures.ai.http import api_error_detail, response_json, retrying_session
-from coursera_lectures.ai.schema import prompt_with_schema
+from lecturefoundry.ai.http import api_error_detail, response_json, retrying_session
+from lecturefoundry.ai.schema import prompt_with_schema
 
 
 class OllamaBackend:

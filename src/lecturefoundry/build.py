@@ -13,11 +13,11 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from coursera_lectures.ai import AIBackend, GenerationRequest
-from coursera_lectures.catalog import load_catalog
-from coursera_lectures.lesson import lesson_content_schema, parse_lesson_content
-from coursera_lectures.patterns import build_lesson_prompt, get_pattern
-from coursera_lectures.rendering import render_lesson
+from lecturefoundry.ai import AIBackend, GenerationRequest
+from lecturefoundry.catalog import load_catalog
+from lecturefoundry.lesson import lesson_content_schema, parse_lesson_content
+from lecturefoundry.patterns import build_lesson_prompt, get_pattern
+from lecturefoundry.rendering import render_lesson
 
 
 @dataclass(frozen=True, slots=True)

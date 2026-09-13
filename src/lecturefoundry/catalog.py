@@ -93,7 +93,7 @@ def load_catalog(course_dir: Path) -> CourseCatalog:
     path = course_dir / CATALOG_FILENAME
     if not path.exists():
         raise FileNotFoundError(
-            f"Missing {path}. Run 'coursera-lectures index --slug {course_dir.name}' first."
+            f"Missing {path}. Run 'lecturefoundry index --slug {course_dir.name}' first."
         )
     return CourseCatalog.from_dict(json.loads(path.read_text(encoding="utf-8")))
 

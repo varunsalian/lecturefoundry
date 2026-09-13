@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
 
-from coursera_lectures.catalog import (
+from lecturefoundry.catalog import (
     catalog_from_coursera_materials,
     load_catalog,
     save_catalog,
     slugify,
 )
-from coursera_lectures.models import FetchRequest
-from coursera_lectures.providers.coursera import CourseraProvider
+from lecturefoundry.models import FetchRequest
+from lecturefoundry.providers.coursera import CourseraProvider
 
 
 def _materials() -> dict:

@@ -1,9 +1,9 @@
 from pathlib import Path
 
-import coursera_lectures.cli as cli
-from coursera_lectures.ai import BackendStatus
-from coursera_lectures.cli import _uses_remote_service
-from coursera_lectures.config import AISettings
+import lecturefoundry.cli as cli
+from lecturefoundry.ai import BackendStatus
+from lecturefoundry.cli import _uses_remote_service
+from lecturefoundry.config import AISettings
 
 
 def test_remote_notice_includes_agentic_cli_backends() -> None:

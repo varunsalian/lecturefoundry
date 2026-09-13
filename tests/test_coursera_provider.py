@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from coursera_lectures.models import FetchRequest, TranscriptFormat
-from coursera_lectures.providers.coursera import CourseraProvider, normalize_cauth
+from lecturefoundry.models import FetchRequest, TranscriptFormat
+from lecturefoundry.providers.coursera import CourseraProvider, normalize_cauth
 
 
 class FakeDownloader:

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from html import escape
 
-from coursera_lectures.catalog import LectureRecord, ModuleRecord
-from coursera_lectures.lesson import LessonContent, LessonSection
-from coursera_lectures.patterns import PatternSpec
+from lecturefoundry.catalog import LectureRecord, ModuleRecord
+from lecturefoundry.lesson import LessonContent, LessonSection
+from lecturefoundry.patterns import PatternSpec
 
 
 BASE_CSS = """

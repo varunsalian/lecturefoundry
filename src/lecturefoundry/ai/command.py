@@ -8,7 +8,7 @@ import subprocess
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
-from coursera_lectures.ai.base import AIBackendError, BackendStatus
+from lecturefoundry.ai.base import AIBackendError, BackendStatus
 
 
 Runner = Callable[..., subprocess.CompletedProcess[str]]

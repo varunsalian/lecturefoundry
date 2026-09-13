@@ -1,11 +1,11 @@
-# Coursera Lectures
+# LectureFoundry
 
-[![Tests](https://github.com/varunsalian/coursera-lectures/actions/workflows/tests.yml/badge.svg)](https://github.com/varunsalian/coursera-lectures/actions/workflows/tests.yml)
+[![Tests](https://github.com/varunsalian/lecturefoundry/actions/workflows/tests.yml/badge.svg)](https://github.com/varunsalian/lecturefoundry/actions/workflows/tests.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Turn transcripts from courses you can access into structured, accessible HTML
-study pages. Use a local Ollama model, an authenticated AI CLI, or a hosted API.
+Forge transcripts from courses you can access into structured, accessible study
+experiences. Use a local Ollama model, an authenticated AI CLI, or a hosted API.
 
 The project keeps AI-generated content separate from page rendering: a model
 returns validated lesson JSON, then deterministic templates render safe HTML.
@@ -52,8 +52,8 @@ CLIs. Hosted providers require their own API key and account.
 Clone the repository and install it in an isolated environment:
 
 ```bash
-git clone https://github.com/varunsalian/coursera-lectures.git
-cd coursera-lectures
+git clone https://github.com/varunsalian/lecturefoundry.git
+cd lecturefoundry
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
@@ -64,8 +64,8 @@ On Windows PowerShell, activate with `.venv\\Scripts\\Activate.ps1`.
 List the available commands and AI providers:
 
 ```bash
-coursera-lectures --help
-coursera-lectures ai providers
+lecturefoundry --help
+lecturefoundry ai providers
 ```
 
 ### 1. Get your Coursera cookie
@@ -83,7 +83,7 @@ shell history, screenshots, issues, or commits.
 The slug is the part after `/learn/` in a Coursera course URL. Run:
 
 ```bash
-coursera-lectures fetch \
+lecturefoundry fetch \
   --slug the-science-of-well-being \
   --language en \
   --format txt
@@ -94,7 +94,7 @@ temporary environment variable and pass only the variable's name:
 
 ```bash
 export COURSERA_CAUTH='your-cookie-value'
-coursera-lectures fetch --slug the-science-of-well-being
+lecturefoundry fetch --slug the-science-of-well-being
 unset COURSERA_CAUTH
 ```
 
@@ -102,7 +102,7 @@ New downloads create `transcripts/<course>/course.json`. If transcripts came
 from an older version, create the ordered catalog with:
 
 ```bash
-coursera-lectures index --slug the-science-of-well-being
+lecturefoundry index --slug the-science-of-well-being
 ```
 
 ### 3. Configure an AI backend
@@ -111,7 +111,7 @@ Edit [`lecture.toml`](lecture.toml). The default is Ollama; set its `model` to
 one shown by `ollama list`, then verify it:
 
 ```bash
-coursera-lectures ai check
+lecturefoundry ai check
 ```
 
 To use Codex CLI, authenticate Codex separately and enable access only for
@@ -127,7 +127,7 @@ model = "gpt-5.6-luna"
 allow_agentic_file_reads = true
 ```
 
-Then check it with `coursera-lectures ai check`. Codex runs ephemerally in a
+Then check it with `lecturefoundry ai check`. Codex runs ephemerally in a
 read-only temporary directory with project rules and user configuration
 disabled. It is still an agentic CLI capable of inspecting readable files, so
 the explicit opt-in defaults to `false`.
@@ -148,7 +148,7 @@ structured_output = true
 
 ```bash
 export OPENAI_API_KEY='your-key'
-coursera-lectures ai check
+lecturefoundry ai check
 ```
 
 The equivalent configuration tables for every provider are already included
@@ -159,13 +159,13 @@ in `lecture.toml`. Literal credentials in provider configuration are rejected.
 See the available patterns:
 
 ```bash
-coursera-lectures patterns
+lecturefoundry patterns
 ```
 
 Generate Module 1, Lecture 4 as a revision page:
 
 ```bash
-coursera-lectures generate \
+lecturefoundry generate \
   --slug the-science-of-well-being \
   --module 1 \
   --lecture 4 \
@@ -212,7 +212,7 @@ Ollama endpoints are treated as remote.
 Run a small provider smoke test with:
 
 ```bash
-printf 'Reply with exactly: ready\n' | coursera-lectures ai run
+printf 'Reply with exactly: ready\n' | lecturefoundry ai run
 ```
 
 `[OK]` from `ai check` means the connection or saved login was verified.

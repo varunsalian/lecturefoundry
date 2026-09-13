@@ -1,7 +1,7 @@
 """Transcript-ingestion use case."""
 
-from coursera_lectures.models import FetchRequest, FetchResult
-from coursera_lectures.providers.base import TranscriptProvider
+from lecturefoundry.models import FetchRequest, FetchResult
+from lecturefoundry.providers.base import TranscriptProvider
 
 
 def fetch_transcripts(

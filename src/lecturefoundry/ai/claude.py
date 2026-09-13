@@ -7,15 +7,15 @@ import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from coursera_lectures.ai.base import (
+from lecturefoundry.ai.base import (
     AIBackendError,
     BackendStatus,
     GenerationRequest,
     GenerationResult,
 )
-from coursera_lectures.ai.command import CommandBackend, ExecutableFinder, Runner
-from coursera_lectures.ai.prompting import combine_prompt
-from coursera_lectures.ai.schema import schema_for_provider
+from lecturefoundry.ai.command import CommandBackend, ExecutableFinder, Runner
+from lecturefoundry.ai.prompting import combine_prompt
+from lecturefoundry.ai.schema import schema_for_provider
 
 
 class ClaudeCLIBackend(CommandBackend):
@@ -54,7 +54,7 @@ class ClaudeCLIBackend(CommandBackend):
                 verified=False,
             )
         try:
-            with TemporaryDirectory(prefix="coursera-lectures-claude-check-") as temp_dir:
+            with TemporaryDirectory(prefix="lecturefoundry-claude-check-") as temp_dir:
                 self._run(
                     [self.command, "auth", "status"],
                     "",
@@ -68,7 +68,7 @@ class ClaudeCLIBackend(CommandBackend):
             return BackendStatus(self.name, False, str(error))
 
     def generate(self, request: GenerationRequest) -> GenerationResult:
-        with TemporaryDirectory(prefix="coursera-lectures-claude-") as temp_dir:
+        with TemporaryDirectory(prefix="lecturefoundry-claude-") as temp_dir:
             working_dir = Path(temp_dir)
             arguments = [
                 self.command,

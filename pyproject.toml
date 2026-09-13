@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "coursera-lectures"
+name = "lecturefoundry"
 version = "0.1.0"
-description = "Turn course transcripts into structured, accessible HTML study pages."
+description = "Forge course transcripts into structured, accessible study experiences."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -36,12 +36,12 @@ dev = [
 ]
 
 [project.scripts]
-coursera-lectures = "coursera_lectures.cli:main"
+lecturefoundry = "lecturefoundry.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/varunsalian/coursera-lectures"
-Repository = "https://github.com/varunsalian/coursera-lectures"
-Issues = "https://github.com/varunsalian/coursera-lectures/issues"
+Homepage = "https://github.com/varunsalian/lecturefoundry"
+Repository = "https://github.com/varunsalian/lecturefoundry"
+Issues = "https://github.com/varunsalian/lecturefoundry/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]

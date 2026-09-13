@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from coursera_lectures.catalog import catalog_from_coursera_materials, save_catalog
-from coursera_lectures.models import FetchRequest, FetchResult
+from lecturefoundry.catalog import catalog_from_coursera_materials, save_catalog
+from lecturefoundry.models import FetchRequest, FetchResult
 
 
 def normalize_cauth(value: str) -> str:

@@ -10,18 +10,18 @@ from pathlib import Path
 from typing import Sequence
 from urllib.parse import urlparse
 
-from coursera_lectures.ai import AIBackendError, GenerationRequest, create_ai_backend
-from coursera_lectures.build import BuildRequest, generate_lecture
-from coursera_lectures.catalog import (
+from lecturefoundry.ai import AIBackendError, GenerationRequest, create_ai_backend
+from lecturefoundry.build import BuildRequest, generate_lecture
+from lecturefoundry.catalog import (
     catalog_from_coursera_materials,
     missing_transcripts,
     save_catalog,
 )
-from coursera_lectures.config import SUPPORTED_PROVIDERS, load_ai_settings
-from coursera_lectures.models import FetchRequest, TranscriptFormat
-from coursera_lectures.patterns import PATTERNS
-from coursera_lectures.providers import CourseraProvider
-from coursera_lectures.services import fetch_transcripts
+from lecturefoundry.config import SUPPORTED_PROVIDERS, load_ai_settings
+from lecturefoundry.models import FetchRequest, TranscriptFormat
+from lecturefoundry.patterns import PATTERNS
+from lecturefoundry.providers import CourseraProvider
+from lecturefoundry.services import fetch_transcripts
 
 
 PROVIDER_DESCRIPTIONS = {
@@ -56,7 +56,7 @@ def _uses_remote_service(provider: str, options: dict) -> bool:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="coursera-lectures",
+        prog="lecturefoundry",
         description="Build local lecture experiences from course transcripts.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)

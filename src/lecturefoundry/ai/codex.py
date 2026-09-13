@@ -7,15 +7,15 @@ import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from coursera_lectures.ai.base import (
+from lecturefoundry.ai.base import (
     AIBackendError,
     BackendStatus,
     GenerationRequest,
     GenerationResult,
 )
-from coursera_lectures.ai.command import CommandBackend, ExecutableFinder, Runner
-from coursera_lectures.ai.prompting import combine_prompt
-from coursera_lectures.ai.schema import schema_for_provider
+from lecturefoundry.ai.command import CommandBackend, ExecutableFinder, Runner
+from lecturefoundry.ai.prompting import combine_prompt
+from lecturefoundry.ai.schema import schema_for_provider
 
 
 class CodexCLIBackend(CommandBackend):
@@ -64,7 +64,7 @@ class CodexCLIBackend(CommandBackend):
                 verified=False,
             )
         try:
-            with TemporaryDirectory(prefix="coursera-lectures-codex-check-") as temp_dir:
+            with TemporaryDirectory(prefix="lecturefoundry-codex-check-") as temp_dir:
                 self._run(
                     [self.command, "login", "status"],
                     "",
@@ -84,7 +84,7 @@ class CodexCLIBackend(CommandBackend):
                 "files. Set [ai.codex].allow_agentic_file_reads=true only for trusted "
                 "transcripts, or use the tool-free OpenAI API backend."
             )
-        with TemporaryDirectory(prefix="coursera-lectures-codex-") as temp_dir:
+        with TemporaryDirectory(prefix="lecturefoundry-codex-") as temp_dir:
             working_dir = Path(temp_dir)
             output_path = working_dir / "result.txt"
             arguments = [
