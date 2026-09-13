@@ -89,13 +89,35 @@ lecturefoundry fetch \
   --format txt
 ```
 
-The CLI asks for `CAUTH` using a hidden prompt. For automation, put it in a
-temporary environment variable and pass only the variable's name:
+LectureFoundry then displays this hidden terminal prompt:
+
+```text
+Coursera CAUTH (input hidden):
+```
+
+**Paste the copied cookie value at that prompt and press Enter.** Nothing will
+appear while you paste or type; that is intentional. Paste the value itself
+(the text after `CAUTH=`). The full `CAUTH=...` form is also accepted. The
+cookie is used for that command and is not written to the project.
+
+Do not put the cookie in `lecture.toml` or `.env`. For non-interactive
+automation only, place it temporarily in an environment variable. The default
+variable name is `COURSERA_CAUTH`:
 
 ```bash
 export COURSERA_CAUTH='your-cookie-value'
 lecturefoundry fetch --slug the-science-of-well-being
 unset COURSERA_CAUTH
+```
+
+To use a different variable name:
+
+```bash
+export MY_COURSERA_COOKIE='your-cookie-value'
+lecturefoundry fetch \
+  --slug the-science-of-well-being \
+  --cookie-env MY_COURSERA_COOKIE
+unset MY_COURSERA_COOKIE
 ```
 
 New downloads create `transcripts/<course>/course.json`. If transcripts came
