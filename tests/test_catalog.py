@@ -70,7 +70,10 @@ def test_catalog_round_trip(tmp_path: Path) -> None:
     path = save_catalog(original, tmp_path)
     loaded = load_catalog(tmp_path)
 
-    assert json.loads(path.read_text())["version"] == 1
+    serialized = json.loads(path.read_text())
+    assert serialized["version"] == 1
+    assert "source_provider" not in serialized
+    assert "source_id" not in serialized["modules"][0]["lectures"][0]
     assert loaded == original
     assert slugify("G.I. Joe & Happiness!") == "g-i-joe-happiness"
 

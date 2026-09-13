@@ -18,10 +18,18 @@ from lecturefoundry.catalog import (
     save_catalog,
 )
 from lecturefoundry.config import SUPPORTED_PROVIDERS, load_ai_settings
-from lecturefoundry.models import FetchRequest, TranscriptFormat
+from lecturefoundry.models import FetchRequest, PlaylistFetchRequest, TranscriptFormat
 from lecturefoundry.patterns import PATTERNS
-from lecturefoundry.providers import CourseraProvider
-from lecturefoundry.services import fetch_transcripts
+from lecturefoundry.providers import (
+    CourseraProvider,
+    YouTubeProvider,
+    YouTubeProviderError,
+)
+from lecturefoundry.services import (
+    CourseNotesRequest,
+    fetch_transcripts,
+    generate_course_notes,
+)
 
 
 PROVIDER_DESCRIPTIONS = {
@@ -79,6 +87,61 @@ def _build_parser() -> argparse.ArgumentParser:
         default="COURSERA_CAUTH",
         metavar="NAME",
         help="Environment variable containing CAUTH (default: COURSERA_CAUTH)",
+    )
+
+    youtube_parser = subparsers.add_parser(
+        "youtube",
+        help="Import a captioned YouTube playlist and generate its notes.",
+    )
+    youtube_parser.add_argument("url", help="YouTube playlist URL")
+    youtube_parser.add_argument(
+        "--slug",
+        help="Optional output slug; defaults to a readable title and playlist-ID slug",
+    )
+    youtube_parser.add_argument("--language", default="en")
+    youtube_parser.add_argument(
+        "--patterns",
+        nargs="+",
+        choices=[*PATTERNS, "all"],
+        default=["revision"],
+        help="Note formats to generate (default: revision; use 'all' for every format)",
+    )
+    youtube_parser.add_argument(
+        "--max-videos",
+        type=int,
+        help="Process only the first N playlist videos",
+    )
+    youtube_parser.add_argument(
+        "--transcripts",
+        type=Path,
+        default=Path("transcripts"),
+    )
+    youtube_parser.add_argument("--output", type=Path, default=Path("site"))
+    youtube_parser.add_argument("--config", type=Path, default=Path("lecture.toml"))
+    youtube_parser.add_argument(
+        "--provider",
+        choices=SUPPORTED_PROVIDERS,
+        help="Override the configured AI provider",
+    )
+    youtube_parser.add_argument("--model", help="Override the configured model")
+    youtube_parser.add_argument(
+        "--base-url",
+        help="Override the provider API base URL",
+    )
+    youtube_parser.add_argument(
+        "--api-key-env",
+        metavar="NAME",
+        help="Override the environment-variable name containing the API key",
+    )
+    youtube_parser.add_argument(
+        "--temperature",
+        type=float,
+        help="Sampling temperature when supported by the selected model/provider",
+    )
+    youtube_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Refresh captions and replace existing generated notes",
     )
 
     index_parser = subparsers.add_parser(
@@ -215,6 +278,99 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"({result.skipped} skipped, {result.failed} failed)."
         )
         return 0 if result.succeeded else 1
+
+    if args.command == "youtube":
+        try:
+            transcripts_dir = args.transcripts.resolve()
+            output_dir = args.output.resolve()
+            settings = load_ai_settings(
+                args.config,
+                provider_override=args.provider,
+                model_override=args.model,
+                base_url_override=args.base_url,
+                api_key_env_override=args.api_key_env,
+            )
+            backend = create_ai_backend(settings)
+            status = backend.check()
+            if not status.available:
+                raise AIBackendError(
+                    f"{status.provider} backend is unavailable: {status.detail}"
+                )
+            if not status.verified:
+                print(
+                    f"warning: {status.provider} backend is configured but could not "
+                    f"be fully verified ({status.detail})",
+                    file=sys.stderr,
+                )
+
+            youtube = YouTubeProvider()
+            imported = youtube.fetch(
+                PlaylistFetchRequest(
+                    url=args.url,
+                    output_dir=transcripts_dir,
+                    language=args.language,
+                    course_slug=args.slug,
+                    max_videos=args.max_videos,
+                    force=args.force,
+                )
+            )
+            print(
+                f"Imported {imported.downloaded}/{imported.total} captions "
+                f"to {imported.output_dir} "
+                f"({imported.skipped} existing, {imported.failed} unavailable)."
+            )
+            for warning in imported.warnings:
+                print(f"warning: {warning}", file=sys.stderr)
+
+            if _uses_remote_service(settings.provider, settings.options):
+                print(
+                    f"notice: sending playlist transcripts to the configured "
+                    f"{settings.provider} service",
+                    file=sys.stderr,
+                )
+
+            pattern_keys = (
+                tuple(PATTERNS)
+                if "all" in args.patterns
+                else tuple(dict.fromkeys(args.patterns))
+            )
+            notes = generate_course_notes(
+                backend,
+                CourseNotesRequest(
+                    course_slug=imported.course_slug,
+                    patterns=pattern_keys,
+                    transcripts_dir=transcripts_dir,
+                    output_dir=output_dir,
+                    system_prompt=settings.system_prompt,
+                    temperature=args.temperature,
+                    force=args.force,
+                    lecture_keys=imported.lecture_keys,
+                ),
+                on_start=lambda module, lecture, pattern: print(
+                    f"Generating {module.number:02d}.{lecture.number:02d} "
+                    f"{pattern}: {lecture.title}"
+                ),
+            )
+            for failure in notes.failures:
+                print(
+                    f"error: {failure.module_number:02d}."
+                    f"{failure.lecture_number:02d} {failure.pattern}: "
+                    f"{failure.error}",
+                    file=sys.stderr,
+                )
+            print(
+                f"Generated {notes.generated} note sets in {notes.output_dir} "
+                f"({notes.existing} existing, {len(notes.failures)} failed)."
+            )
+            return 0 if notes.succeeded else 1
+        except (
+            AIBackendError,
+            OSError,
+            ValueError,
+            YouTubeProviderError,
+        ) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 1
 
     if args.command == "index":
         try:

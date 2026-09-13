@@ -12,7 +12,7 @@ license = {file = "LICENSE"}
 authors = [
   {name = "Varun Salian"},
 ]
-keywords = ["coursera", "transcripts", "education", "html", "ollama", "llm"]
+keywords = ["coursera", "youtube", "transcripts", "education", "html", "ollama", "llm"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
@@ -28,6 +28,7 @@ dependencies = [
   "coursera-transcripts==0.1.6",
   "requests>=2.31",
   "tomli>=2; python_version < '3.11'",
+  "yt-dlp>=2025.1.15",
 ]
 
 [project.optional-dependencies]

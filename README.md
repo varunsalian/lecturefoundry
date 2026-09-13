@@ -4,8 +4,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Forge transcripts from courses you can access into structured, accessible study
-experiences. Use a local Ollama model, an authenticated AI CLI, or a hosted API.
+Forge transcripts from courses and captioned YouTube playlists into structured,
+accessible study experiences. Use a local Ollama model, an authenticated AI
+CLI, or a hosted API.
 
 The project keeps AI-generated content separate from page rendering: a model
 returns validated lesson JSON, then deterministic templates render safe HTML.
@@ -22,9 +23,11 @@ The same core library can power the CLI today and a web UI later.
 
 - Downloads transcripts for an enrolled Coursera course using a securely
   prompted `CAUTH` cookie.
+- Imports uploaded or automatic captions from a YouTube playlist without
+  downloading its video or audio.
 - Preserves the real module and lecture order in a reusable course catalog.
-- Generates one numbered lecture at a time, preventing accidental whole-course
-  AI usage.
+- Supports protected one-lecture generation and an explicit YouTube playlist
+  batch workflow with a configurable video limit.
 - Supports four study patterns: one-page revision, descriptive deep dive,
   active recall, and concept map.
 - Supports Ollama, Codex CLI, Claude Code CLI, OpenAI, OpenAI-compatible APIs,
@@ -42,7 +45,8 @@ The same core library can power the CLI today and a web UI later.
 ## Requirements
 
 - Python 3.10 or newer
-- A Coursera account with access to the course you want to process
+- A Coursera account for Coursera imports, or a public captioned YouTube
+  playlist
 - At least one supported AI backend
 
 For local generation, install [Ollama](https://ollama.com/) and pull an
@@ -178,6 +182,51 @@ lecturefoundry ai check
 The equivalent configuration tables for every provider are already included
 in `lecture.toml`. Literal credentials in provider configuration are rejected.
 
+### YouTube playlist to notes
+
+After configuring the AI backend, one command imports a playlist's captions and
+generates one-page revision notes for every captioned video:
+
+```bash
+lecturefoundry youtube \
+  "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID"
+```
+
+The first import creates a readable course folder from the playlist title plus
+a stable playlist-ID suffix. Its videos become numbered lectures under
+`01-videos`. LectureFoundry prefers creator-provided captions and falls back to
+YouTube automatic captions in the requested language. It does not download
+video or audio, and it reports unavailable, deleted, private, or uncaptioned
+entries instead of trying to transcribe them.
+
+Generate all four study formats with:
+
+```bash
+lecturefoundry youtube \
+  "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID" \
+  --patterns all
+```
+
+Useful controls include `--language`, `--slug`, `--max-videos`, `--provider`,
+`--model`, and `--force`. For example, test the first two videos before running
+a large playlist:
+
+```bash
+lecturefoundry youtube \
+  "https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID" \
+  --max-videos 2 \
+  --patterns revision
+```
+
+Rerunning the command finds the existing course by playlist ID and skips
+existing captions and note sets unless `--force` is provided. Video IDs keep
+lecture folders stable if titles or playlist positions change. Limited imports
+and temporary caption failures preserve previously cataloged lectures. Before
+importing anything, the command also checks that the selected AI backend is
+available. The generated `site/<playlist>/` directory uses the same layout as a
+Coursera course and can be uploaded directly beneath the app's WebDAV library
+root.
+
 ### 4. Generate one lecture
 
 See the available patterns:
@@ -279,7 +328,8 @@ connection.
 ```text
 CLI / future UI
        |
-       +-- Fetch service --> TranscriptProvider --> CourseraProvider
+       +-- Transcript import --> CourseraProvider
+       |                    \--> YouTubeProvider (captions only)
        |
        +-- Generate service --> Pattern prompt --> AIBackend
                                     |
@@ -322,9 +372,10 @@ pytest
 python -m compileall -q src tests
 ```
 
-Tests use fake providers and do not contact Coursera or paid AI services. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Community
-participation is governed by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+Tests use fake providers and do not contact Coursera, YouTube, or paid AI
+services. See [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+Community participation is governed by
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
 ## License
 

@@ -32,6 +32,7 @@ class LectureRecord:
     title: str
     slug: str
     transcript: str
+    source_id: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,6 +48,10 @@ class CourseCatalog:
     course_slug: str
     modules: tuple[ModuleRecord, ...]
     version: int = 1
+    source_provider: str = ""
+    source_id: str = ""
+    source_url: str = ""
+    title: str = ""
 
     def find(self, module_number: int, lecture_number: int) -> tuple[ModuleRecord, LectureRecord]:
         for module in self.modules:
@@ -61,7 +66,15 @@ class CourseCatalog:
         raise ValueError(f"Course has no module {module_number:02d}")
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        for key in ("source_provider", "source_id", "source_url", "title"):
+            if not data[key]:
+                del data[key]
+        for module in data["modules"]:
+            for lecture in module["lectures"]:
+                if not lecture["source_id"]:
+                    del lecture["source_id"]
+        return data
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CourseCatalog":
@@ -76,6 +89,7 @@ class CourseCatalog:
                         title=str(lecture["title"]),
                         slug=str(lecture["slug"]),
                         transcript=str(lecture["transcript"]),
+                        source_id=str(lecture.get("source_id", "")),
                     )
                     for lecture in module.get("lectures", [])
                 ),
@@ -86,6 +100,10 @@ class CourseCatalog:
             course_slug=str(data["course_slug"]),
             modules=modules,
             version=int(data.get("version", 1)),
+            source_provider=str(data.get("source_provider", "")),
+            source_id=str(data.get("source_id", "")),
+            source_url=str(data.get("source_url", "")),
+            title=str(data.get("title", "")),
         )
 
 

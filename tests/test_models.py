@@ -2,7 +2,12 @@ from pathlib import Path
 
 import pytest
 
-from lecturefoundry.models import FetchRequest, FetchResult, TranscriptFormat
+from lecturefoundry.models import (
+    FetchRequest,
+    FetchResult,
+    PlaylistFetchRequest,
+    TranscriptFormat,
+)
 
 
 def test_fetch_request_defaults() -> None:
@@ -33,3 +38,20 @@ def test_fetch_result_treats_all_skipped_as_success() -> None:
     )
 
     assert result.succeeded
+
+
+def test_playlist_fetch_request_validates_url_and_limit() -> None:
+    request = PlaylistFetchRequest(
+        url="https://www.youtube.com/playlist?list=example",
+        output_dir=Path("transcripts"),
+        max_videos=3,
+    )
+
+    assert request.language == "en"
+    assert request.max_videos == 3
+
+    with pytest.raises(ValueError, match="YouTube playlist URL"):
+        PlaylistFetchRequest(
+            url="https://example.com/playlist",
+            output_dir=Path("transcripts"),
+        )
