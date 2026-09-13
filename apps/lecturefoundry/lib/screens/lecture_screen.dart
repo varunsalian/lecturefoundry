@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/library_models.dart';
 import '../services/library_repository.dart';
-import '../widgets/content_shell.dart';
-import '../widgets/library_card.dart';
 import 'reader_screen.dart';
 
 class LectureScreen extends StatefulWidget {
@@ -37,82 +35,103 @@ class _LectureScreenState extends State<LectureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.lecture.name)),
-      body: AsyncPane<List<StudyPatternRef>>(
-        future: _patterns,
-        onRetry: _refresh,
-        builder: (context, patterns) {
-          if (patterns.isEmpty) {
-            return const EmptyLibrary(
-              message:
+    return FutureBuilder<List<StudyPatternRef>>(
+      future: _patterns,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return _LoadingLecture(title: widget.lecture.name);
+        }
+        if (snapshot.hasError) {
+          return _LectureLoadError(
+            title: widget.lecture.name,
+            error: snapshot.error.toString(),
+            onRetry: _refresh,
+          );
+        }
+
+        final patterns = snapshot.data!;
+        if (patterns.isEmpty) {
+          return Scaffold(
+            appBar: AppBar(title: Text(widget.lecture.name)),
+            body: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(40),
+                child: Text(
                   'No generated study patterns were found for this lecture.',
-            );
-          }
-          return ContentShell(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'How do you want to study?',
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Switch between formats at any time.',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 22),
-                ...patterns.map(
-                  (pattern) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: LibraryCard(
-                      title: pattern.name,
-                      subtitle: _description(pattern.key),
-                      icon: _icon(pattern.key),
-                      color: _color(pattern.key),
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => ReaderScreen(
-                            repository: widget.repository,
-                            lecture: widget.lecture,
-                            patterns: patterns,
-                            initialPattern: pattern,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           );
-        },
-      ),
+        }
+
+        final initialPattern = patterns.firstWhere(
+          (pattern) => pattern.key == 'revision',
+          orElse: () => patterns.first,
+        );
+        return ReaderScreen(
+          repository: widget.repository,
+          lecture: widget.lecture,
+          patterns: patterns,
+          initialPattern: initialPattern,
+        );
+      },
     );
   }
+}
 
-  String _description(String key) => switch (key) {
-    'revision' => 'Fast summary and key takeaways',
-    'deep-dive' => 'Full explanations and examples',
-    'active-recall' => 'Questions that test your memory',
-    'concept-map' => 'See how the ideas connect',
-    _ => 'Open study notes',
-  };
+class _LoadingLecture extends StatelessWidget {
+  const _LoadingLecture({required this.title});
 
-  IconData _icon(String key) => switch (key) {
-    'revision' => Icons.bolt_rounded,
-    'deep-dive' => Icons.scuba_diving_rounded,
-    'active-recall' => Icons.psychology_alt_rounded,
-    'concept-map' => Icons.account_tree_rounded,
-    _ => Icons.article_outlined,
-  };
+  final String title;
 
-  Color _color(String key) => switch (key) {
-    'revision' => const Color(0xFFF59E0B),
-    'deep-dive' => const Color(0xFF2563EB),
-    'active-recall' => const Color(0xFF059669),
-    'concept-map' => const Color(0xFFDB2777),
-    _ => Theme.of(context).colorScheme.primary,
-  };
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(title)),
+    body: const Center(child: CircularProgressIndicator()),
+  );
+}
+
+class _LectureLoadError extends StatelessWidget {
+  const _LectureLoadError({
+    required this.title,
+    required this.error,
+    required this.onRetry,
+  });
+
+  final String title;
+  final String error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(title)),
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try again'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
