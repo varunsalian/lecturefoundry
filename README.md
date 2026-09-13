@@ -36,6 +36,8 @@ The same core library can power the CLI today and a web UI later.
   working lecture.
 - Keeps cookies and unrelated environment credentials away from AI CLI
   subprocesses.
+- Includes a native Flutter reader that syncs generated notes directly from
+  any HTTPS WebDAV provider on Android, iOS, macOS, Windows, and Linux.
 
 ## Requirements
 
@@ -214,6 +216,36 @@ site/
 
 Different patterns can coexist for the same lecture. `generation.json` records
 the provider, model, pattern version, timestamp, and transcript checksum.
+
+### 5. Read notes from WebDAV
+
+The companion app in [`apps/lecturefoundry`](apps/lecturefoundry) renders
+`lesson.json` natively, so it adapts to phones, tablets, and desktop windows.
+Upload the generated course directories using this hierarchy:
+
+```text
+Our Project/
+└── Course 1/
+    └── 01-module-name/
+        └── 01-lecture-name/
+            ├── revision/lesson.json
+            ├── deep-dive/lesson.json
+            ├── active-recall/lesson.json
+            └── concept-map/lesson.json
+```
+
+Run the app and enter the HTTPS WebDAV endpoint, username, app password, and
+root folder. Credentials are entered at runtime and saved in the operating
+system's secure credential store; they do not belong in this repository.
+
+```bash
+cd apps/lecturefoundry
+flutter pub get
+flutter run
+```
+
+See the [app README](apps/lecturefoundry/README.md) for provider setup and
+platform prerequisites.
 
 ## Providers
 
