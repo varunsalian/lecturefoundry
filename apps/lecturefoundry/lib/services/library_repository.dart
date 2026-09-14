@@ -3,7 +3,9 @@ import 'dart:convert';
 import '../models/library_models.dart';
 import '../models/webdav_settings.dart';
 import 'lesson_cache.dart';
+import 'read_progress_store.dart';
 import 'webdav_client.dart';
+import 'webdav_read_progress_store.dart';
 
 class LibraryRepository {
   LibraryRepository({
@@ -11,12 +13,16 @@ class LibraryRepository {
     required this.rootPath,
     required this.cacheNamespace,
     LessonCacheStore? cache,
-  }) : cache = cache ?? LessonCache();
+    ReadProgressStorage? readProgress,
+  }) : cache = cache ?? LessonCache(),
+       readProgress =
+           readProgress ?? _defaultReadProgress(source, cacheNamespace);
 
   final WebDavDataSource source;
   final String rootPath;
   final String cacheNamespace;
   final LessonCacheStore cache;
+  final ReadProgressStorage readProgress;
 
   static const patternNames = <String, String>{
     'revision': 'One-page revision',
@@ -71,7 +77,32 @@ class LibraryRepository {
         .where((lecture) => lecture.number > 0)
         .toList();
     lectures.sort((a, b) => a.number.compareTo(b.number));
-    return lectures;
+    if (lectures.isNotEmpty && readProgress is RefreshableReadProgressStorage) {
+      (readProgress as RefreshableReadProgressStorage).invalidate(
+        lectures.first.path,
+      );
+    }
+    return Future.wait(
+      lectures.map(
+        (lecture) async =>
+            lecture.copyWith(isRead: await _readStatus(lecture.path)),
+      ),
+    );
+  }
+
+  Future<bool> isLectureRead(LectureRef lecture) =>
+      readProgress.isRead(lecture.path);
+
+  Future<void> setLectureRead(LectureRef lecture, {required bool isRead}) =>
+      readProgress.setRead(lecture.path, isRead: isRead);
+
+  Future<bool> _readStatus(String path) async {
+    try {
+      return await readProgress.isRead(path);
+    } catch (_) {
+      // Progress is optional metadata and must not hide cloud lectures.
+      return false;
+    }
   }
 
   Future<List<StudyPatternRef>> listPatterns(LectureRef lecture) async {
@@ -145,6 +176,22 @@ class LibraryRepository {
 
   bool _visibleCollection(WebDavEntry entry) =>
       entry.isCollection && !entry.displayName.startsWith('.');
+}
+
+ReadProgressStorage _defaultReadProgress(
+  WebDavDataSource source,
+  String namespace,
+) {
+  final local = ReadProgressStore(namespace: namespace);
+  if (source is WebDavWritableDataSource &&
+      source is WebDavVersionedDataSource) {
+    return WebDavReadProgressStore(
+      source: source as WebDavVersionedDataSource,
+      destination: source as WebDavWritableDataSource,
+      local: local,
+    );
+  }
+  return local;
 }
 
 class NumberedFolder {

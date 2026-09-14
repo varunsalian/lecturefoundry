@@ -11,6 +11,26 @@ abstract interface class WebDavDataSource {
   Future<String> downloadText(String remotePath);
 }
 
+abstract interface class WebDavWritableDataSource {
+  Future<String?> uploadText(
+    String remotePath,
+    String contents, {
+    String? ifMatch,
+    bool createOnly = false,
+  });
+}
+
+abstract interface class WebDavVersionedDataSource {
+  Future<WebDavTextResource> downloadTextResource(String remotePath);
+}
+
+class WebDavTextResource {
+  const WebDavTextResource({required this.contents, required this.etag});
+
+  final String contents;
+  final String? etag;
+}
+
 class WebDavEntry {
   const WebDavEntry({
     required this.displayName,
@@ -38,7 +58,19 @@ class WebDavException implements Exception {
   String toString() => message;
 }
 
-class WebDavClient implements WebDavDataSource {
+class WebDavNotFoundException extends WebDavException {
+  const WebDavNotFoundException(super.message);
+}
+
+class WebDavConflictException extends WebDavException {
+  const WebDavConflictException(super.message);
+}
+
+class WebDavClient
+    implements
+        WebDavDataSource,
+        WebDavWritableDataSource,
+        WebDavVersionedDataSource {
   WebDavClient(
     this.settings, {
     http.Client? client,
@@ -103,7 +135,11 @@ class WebDavClient implements WebDavDataSource {
   }
 
   @override
-  Future<String> downloadText(String remotePath) async {
+  Future<String> downloadText(String remotePath) async =>
+      (await downloadTextResource(remotePath)).contents;
+
+  @override
+  Future<WebDavTextResource> downloadTextResource(String remotePath) async {
     late final http.Response response;
     try {
       response = await _client
@@ -124,7 +160,54 @@ class WebDavClient implements WebDavDataSource {
         'Could not download this note (HTTP ${response.statusCode}).',
       );
     }
-    return utf8.decode(response.bodyBytes);
+    return WebDavTextResource(
+      contents: utf8.decode(response.bodyBytes),
+      etag: response.headers['etag'],
+    );
+  }
+
+  @override
+  Future<String?> uploadText(
+    String remotePath,
+    String contents, {
+    String? ifMatch,
+    bool createOnly = false,
+  }) async {
+    late final http.Response response;
+    try {
+      response = await _client
+          .put(
+            _buildUri(remotePath),
+            headers: {
+              ..._headers,
+              'Content-Type': 'application/json; charset=utf-8',
+              'If-Match': ?ifMatch,
+              if (createOnly) 'If-None-Match': '*',
+            },
+            body: utf8.encode(contents),
+          )
+          .timeout(requestTimeout);
+    } on TimeoutException {
+      throw const WebDavException(
+        'The WebDAV server took too long to save reading progress.',
+      );
+    } on http.ClientException {
+      throw const WebDavException(
+        'Could not reach the WebDAV server to save reading progress.',
+      );
+    }
+    if (response.statusCode == 409 || response.statusCode == 412) {
+      throw const WebDavConflictException(
+        'Reading progress changed on another device.',
+      );
+    }
+    _checkStatus(response.statusCode, remotePath);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw WebDavException(
+        'Could not save reading progress (HTTP ${response.statusCode}).',
+      );
+    }
+    return response.headers['etag'];
   }
 
   void close() => _client.close();
@@ -161,7 +244,7 @@ class WebDavClient implements WebDavDataSource {
       );
     }
     if (status == 404) {
-      throw WebDavException('Cloud folder not found: $remotePath');
+      throw WebDavNotFoundException('Cloud item not found: $remotePath');
     }
   }
 }

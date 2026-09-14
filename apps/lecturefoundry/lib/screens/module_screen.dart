@@ -63,14 +63,18 @@ class _ModuleScreenState extends State<ModuleScreen> {
                       subtitle: 'Lecture ${lecture.number}',
                       icon: Icons.play_lesson_outlined,
                       number: lecture.number,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => LectureScreen(
-                            repository: widget.repository,
-                            lecture: lecture,
+                      isRead: lecture.isRead,
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => LectureScreen(
+                              repository: widget.repository,
+                              lecture: lecture,
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                        if (mounted) _refresh();
+                      },
                     ),
                   ),
                 ),

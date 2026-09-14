@@ -9,6 +9,7 @@ class LibraryCard extends StatelessWidget {
     super.key,
     this.number,
     this.color,
+    this.isRead = false,
   });
 
   final String title;
@@ -17,6 +18,7 @@ class LibraryCard extends StatelessWidget {
   final VoidCallback onTap;
   final int? number;
   final Color? color;
+  final bool isRead;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +63,14 @@ class LibraryCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (isRead) ...[
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  semanticLabel: 'Read',
+                ),
+                const SizedBox(width: 8),
+              ],
               const Icon(Icons.chevron_right_rounded),
             ],
           ),

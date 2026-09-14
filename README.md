@@ -275,6 +275,7 @@ Upload the generated course directories using this hierarchy:
 ```text
 Our Project/
 └── Course 1/
+    ├── .lecturefoundry-progress.json
     └── 01-module-name/
         └── 01-lecture-name/
             ├── revision/lesson.json
@@ -286,6 +287,8 @@ Our Project/
 Run the app and enter the HTTPS WebDAV endpoint, username, app password, and
 root folder. Credentials are entered at runtime and saved in the operating
 system's secure credential store; they do not belong in this repository.
+The app creates `.lecturefoundry-progress.json` inside each course to sync
+read/unread ticks between devices, with a local offline cache as a fallback.
 
 ```bash
 cd apps/lecturefoundry

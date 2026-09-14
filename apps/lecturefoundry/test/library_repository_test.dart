@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lecturefoundry/models/library_models.dart';
 import 'package:lecturefoundry/services/lesson_cache.dart';
 import 'package:lecturefoundry/services/library_repository.dart';
+import 'package:lecturefoundry/services/read_progress_store.dart';
 import 'package:lecturefoundry/services/webdav_client.dart';
 
 void main() {
@@ -69,6 +70,32 @@ void main() {
       repository.loadLesson(_revisionPattern),
       throwsA(isA<WebDavException>()),
     );
+  });
+
+  test('adds locally persisted read state to discovered lectures', () async {
+    const modulePath = '/Our Project/course/01-module/';
+    const lecturePath = '${modulePath}01-lecture/';
+    final progress = _FakeProgress()..readPaths.add(lecturePath);
+    final repository = LibraryRepository(
+      source: _FakeSource({
+        modulePath: const [
+          WebDavEntry(
+            displayName: '01-lecture',
+            path: lecturePath,
+            isCollection: true,
+          ),
+        ],
+      }),
+      rootPath: '/Our Project/',
+      cacheNamespace: 'server-a\nuser-a',
+      readProgress: progress,
+    );
+
+    final lectures = await repository.listLectures(
+      const ModuleRef(number: 1, name: 'Module', path: modulePath),
+    );
+
+    expect(lectures.single.isRead, isTrue);
   });
 
   test('keeps the last valid cache when the cloud JSON is malformed', () async {
@@ -155,6 +182,23 @@ class _FakeCache implements LessonCacheStore {
     final key = _key(namespace, remotePath);
     writes.add(key);
     values[key] = contents;
+  }
+}
+
+class _FakeProgress implements ReadProgressStorage {
+  final Set<String> readPaths = {};
+
+  @override
+  Future<bool> isRead(String lecturePath) async =>
+      readPaths.contains(lecturePath);
+
+  @override
+  Future<void> setRead(String lecturePath, {required bool isRead}) async {
+    if (isRead) {
+      readPaths.add(lecturePath);
+    } else {
+      readPaths.remove(lecturePath);
+    }
   }
 }
 

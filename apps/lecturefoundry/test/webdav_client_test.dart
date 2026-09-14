@@ -112,6 +112,79 @@ void main() {
     );
     client.close();
   });
+
+  test('uploads UTF-8 JSON to an encoded WebDAV path', () async {
+    late http.Request captured;
+    final transport = MockClient((request) async {
+      captured = request;
+      return http.Response('', 204, headers: {'etag': '"next"'});
+    });
+    final client = WebDavClient(
+      const WebDavSettings(
+        endpoint: 'https://cloud.example/dav/',
+        username: 'demo',
+        password: 'test-password',
+        rootPath: '/Our Project/',
+      ),
+      client: transport,
+    );
+
+    final etag = await client.uploadText(
+      '/Our Project/My Course/.lecturefoundry-progress.json',
+      '{"title":"Café"}\n',
+      ifMatch: '"current"',
+    );
+
+    expect(captured.method, 'PUT');
+    expect(
+      captured.url.toString(),
+      'https://cloud.example/dav/Our%20Project/My%20Course/.lecturefoundry-progress.json',
+    );
+    expect(captured.headers['Content-Type'], contains('application/json'));
+    expect(captured.headers['If-Match'], '"current"');
+    expect(utf8.decode(captured.bodyBytes), '{"title":"Café"}\n');
+    expect(etag, '"next"');
+    client.close();
+  });
+
+  test('returns an ETag with downloaded text', () async {
+    final client = WebDavClient(
+      const WebDavSettings(
+        endpoint: 'https://cloud.example/dav/',
+        username: 'demo',
+        password: 'test-password',
+        rootPath: '/',
+      ),
+      client: MockClient(
+        (_) async =>
+            http.Response('{"version":1}', 200, headers: {'etag': '"current"'}),
+      ),
+    );
+
+    final resource = await client.downloadTextResource('/progress.json');
+
+    expect(resource.contents, '{"version":1}');
+    expect(resource.etag, '"current"');
+    client.close();
+  });
+
+  test('reports a conditional upload conflict', () async {
+    final client = WebDavClient(
+      const WebDavSettings(
+        endpoint: 'https://cloud.example/dav/',
+        username: 'demo',
+        password: 'test-password',
+        rootPath: '/',
+      ),
+      client: MockClient((_) async => http.Response('', 412)),
+    );
+
+    await expectLater(
+      client.uploadText('/progress.json', '{}', ifMatch: '"old"'),
+      throwsA(isA<WebDavConflictException>()),
+    );
+    client.close();
+  });
 }
 
 class _StallingClient extends http.BaseClient {

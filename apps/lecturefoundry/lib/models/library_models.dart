@@ -22,11 +22,20 @@ class LectureRef {
     required this.number,
     required this.name,
     required this.path,
+    this.isRead = false,
   });
 
   final int number;
   final String name;
   final String path;
+  final bool isRead;
+
+  LectureRef copyWith({bool? isRead}) => LectureRef(
+    number: number,
+    name: name,
+    path: path,
+    isRead: isRead ?? this.isRead,
+  );
 }
 
 class StudyPatternRef {

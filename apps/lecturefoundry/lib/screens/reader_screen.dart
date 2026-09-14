@@ -25,11 +25,14 @@ class ReaderScreen extends StatefulWidget {
 class _ReaderScreenState extends State<ReaderScreen> {
   late StudyPatternRef _selected;
   late Future<LessonDocument> _lesson;
+  late bool _isRead;
+  bool _savingReadState = false;
 
   @override
   void initState() {
     super.initState();
     _selected = widget.initialPattern;
+    _isRead = widget.lecture.isRead;
     _load();
   }
 
@@ -43,10 +46,44 @@ class _ReaderScreenState extends State<ReaderScreen> {
     _load();
   }
 
+  Future<void> _toggleRead() async {
+    if (_savingReadState) return;
+    final previous = _isRead;
+    setState(() {
+      _isRead = !previous;
+      _savingReadState = true;
+    });
+    try {
+      await widget.repository.setLectureRead(widget.lecture, isRead: _isRead);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isRead = previous);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not save reading progress.')),
+      );
+    } finally {
+      if (mounted) setState(() => _savingReadState = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.lecture.name)),
+      appBar: AppBar(
+        title: Text(widget.lecture.name),
+        actions: [
+          IconButton(
+            onPressed: _savingReadState ? null : _toggleRead,
+            icon: Icon(
+              _isRead
+                  ? Icons.check_circle_rounded
+                  : Icons.check_circle_outline_rounded,
+            ),
+            tooltip: _isRead ? 'Mark as unread' : 'Mark as read',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Column(
         children: [
           Material(

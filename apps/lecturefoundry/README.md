@@ -13,6 +13,8 @@ provider-specific SDK.
   Windows credential storage, or Linux Secret Service.
 - Caches opened `lesson.json` files and falls back to the cached copy when a
   download temporarily fails.
+- Lets users mark lectures as read and syncs those ticks between devices using
+  a small course-level WebDAV metadata file. Offline changes sync later.
 
 ## Cloud folder structure
 
@@ -22,6 +24,7 @@ the output layout produced by LectureFoundry:
 ```text
 Our Project/
 ├── Course 1/
+│   ├── .lecturefoundry-progress.json
 │   └── 01-module-name/
 │       └── 01-lecture-name/
 │           ├── revision/lesson.json
@@ -35,6 +38,12 @@ Our Project/
 Folder names for modules and lectures must begin with a number followed by a
 hyphen, underscore, or space. Extra files such as `index.html`, `source.json`,
 and `generation.json` are safely ignored.
+
+The reader creates `.lecturefoundry-progress.json` automatically after a
+lecture is marked read or unread. It contains only lecture-relative paths,
+boolean read states, and update timestamps—never WebDAV credentials or lesson
+content. A timestamped device cache keeps progress usable offline and merges it
+back into this course file after connectivity returns.
 
 ## Connect to Koofr
 
@@ -86,9 +95,9 @@ configuration is supplied. Copy `android/key.properties.example` to
 placeholder values. Both the real properties file and keystore files are
 ignored by Git. Never distribute a release signed with Android's debug key.
 
-Apple device builds need the usual Xcode signing team. The macOS and iOS
-projects already contain the Keychain Sharing entitlements required for secure
-credential storage.
+Apple device distribution builds need the usual Xcode signing team. macOS uses
+the classic Keychain API so local ad-hoc builds can store credentials securely
+without a provisioning profile; iOS device builds still use Xcode signing.
 
 Android secure storage requires API 23 or later; the effective app minimum is
 the value supplied by the installed Flutter SDK. On Windows, install Visual

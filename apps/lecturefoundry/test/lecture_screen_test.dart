@@ -4,17 +4,20 @@ import 'package:lecturefoundry/models/library_models.dart';
 import 'package:lecturefoundry/screens/lecture_screen.dart';
 import 'package:lecturefoundry/services/lesson_cache.dart';
 import 'package:lecturefoundry/services/library_repository.dart';
+import 'package:lecturefoundry/services/read_progress_store.dart';
 import 'package:lecturefoundry/services/webdav_client.dart';
 
 void main() {
   testWidgets('opens revision first and switches formats in the reader', (
     tester,
   ) async {
+    final progress = _MemoryProgress();
     final repository = LibraryRepository(
       source: _LectureSource(),
       rootPath: '/Our Project/',
       cacheNamespace: 'test',
       cache: _NoopCache(),
+      readProgress: progress,
     );
 
     await tester.pumpWidget(
@@ -38,7 +41,34 @@ void main() {
       find.widgetWithText(ChoiceChip, 'Deep dive'),
     );
     expect(deepDiveChip.selected, isTrue);
+
+    await tester.tap(find.byTooltip('Mark as read'));
+    await tester.pumpAndSettle();
+
+    expect(progress.readPaths, contains(_lecture.path));
+    expect(find.byTooltip('Mark as unread'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Mark as unread'));
+    await tester.pumpAndSettle();
+    expect(progress.readPaths, isNot(contains(_lecture.path)));
   });
+}
+
+class _MemoryProgress implements ReadProgressStorage {
+  final Set<String> readPaths = {};
+
+  @override
+  Future<bool> isRead(String lecturePath) async =>
+      readPaths.contains(lecturePath);
+
+  @override
+  Future<void> setRead(String lecturePath, {required bool isRead}) async {
+    if (isRead) {
+      readPaths.add(lecturePath);
+    } else {
+      readPaths.remove(lecturePath);
+    }
+  }
 }
 
 class _LectureSource implements WebDavDataSource {
